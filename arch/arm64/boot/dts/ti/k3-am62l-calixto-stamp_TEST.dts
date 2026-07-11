@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only or MIT
 /*
  * Device Tree file for the Calixto AM62L3 STAMP SOM Evaluation Board TESTING PURPOSE ONLY!!!
+ * Ethernet address 7 was set for the inital two stamp som evbs 1gb , 2gb single core boards.
  */
 
 /dts-v1/;
