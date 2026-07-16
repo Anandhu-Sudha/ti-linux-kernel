@@ -35,48 +35,6 @@
 		bootph-all;
 	};
 
-	hdmi0: connector-hdmi {
-		compatible = "hdmi-connector";
-		label = "hdmi";
-		type = "a";
-
-		port {
-			hdmi_connector_in: endpoint {
-				remote-endpoint = <&sii9022_out>;
-			};
-		};
-	};
-
-	gpio_keys: gpio-keys {
-		compatible = "gpio-keys";
-		autorepeat;
-		pinctrl-names = "default";
-		pinctrl-0 = <&usr_button_pins_default>;
-
-		usr: button-usr {
-			label = "User Key";
-			linux,code = <BTN_0>;
-			gpios = <&main_gpio0 90 GPIO_ACTIVE_LOW>;
-			interrupts-extended = <&main_gpio0 90 IRQ_TYPE_EDGE_RISING>,
-				<&pmx0 0x01ac>;
-			interrupt-names = "irq", "wakeup";
-		};
-	};
-
-	leds {
-		compatible = "gpio-leds";
-		pinctrl-names = "default";
-		pinctrl-0 = <&usr_led_pins_default>;
-
-		led-0 {
-			label = "am62-sk:green:heartbeat";
-			gpios = <&main_gpio0 123 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "heartbeat";
-			function = LED_FUNCTION_HEARTBEAT;
-			default-state = "on";
-		};
-	};
-
 	vmain_pd: regulator-0 {
 		/* TPS65988 PD CONTROLLER OUTPUT */
 		bootph-all;
@@ -121,41 +79,6 @@
 		vin-supply = <&vcc_3v3_sys>;
 		regulator-always-on;
 		regulator-boot-on;
-	};
-
-	tlv320_mclk: clk-0 {
-		#clock-cells = <0>;
-		compatible = "fixed-clock";
-		clock-frequency = <12288000>;
-	};
-
-	codec_audio: sound {
-		compatible = "simple-audio-card";
-		simple-audio-card,name = "AM62L-SKEVM";
-		simple-audio-card,widgets =
-			"Headphone",	"Headphone Jack",
-			"Line",		"Line In",
-			"Microphone",	"Microphone Jack";
-		simple-audio-card,routing =
-			"Headphone Jack",	"HPLOUT",
-			"Headphone Jack",	"HPROUT",
-			"LINE1L",		"Line In",
-			"LINE1R",		"Line In",
-			"MIC3R",		"Microphone Jack",
-			"Microphone Jack",	"Mic Bias";
-		simple-audio-card,format = "dsp_b";
-		simple-audio-card,bitclock-master = <&sound_master>;
-		simple-audio-card,frame-master = <&sound_master>;
-		simple-audio-card,bitclock-inversion;
-
-		simple-audio-card,cpu {
-			sound-dai = <&mcasp0>;
-		};
-
-		sound_master: simple-audio-card,codec {
-			sound-dai = <&tlv320aic3106>;
-			clocks = <&tlv320_mclk>;
-		};
 	};
 };
 
@@ -496,79 +419,7 @@
 				   "GPIO_eMMC_RSTn", "SoC_WLAN_SDIO_RST";
 		bootph-all;
 	};
-
-	sii9022: bridge-hdmi@3b {
-		compatible = "sil,sii9022";
-		reg = <0x3b>;
-		interrupt-parent = <&exp1>;
-		interrupts = <16 IRQ_TYPE_EDGE_FALLING>;
-		#sound-dai-cells = <0>;
-		sil,i2s-data-lanes = < 0 >;
-		pinctrl-names = "default";
-		pinctrl-0 = <&main_dpi_pins_default>;
-		bootph-all;
-
-		ports {
-			#address-cells = <1>;
-			#size-cells = <0>;
-
-			port@0 {
-				reg = <0>;
-
-				sii9022_in: endpoint {
-					remote-endpoint = <&dpi_out>;
-				};
-			};
-
-			port@1 {
-				reg = <1>;
-
-				sii9022_out: endpoint {
-					remote-endpoint = <&hdmi_connector_in>;
-				};
-			};
-		};
-	};
-
-	tlv320aic3106: audio-codec@1b {
-		#sound-dai-cells = <0>;
-		compatible = "ti,tlv320aic3106";
-		reg = <0x1b>;
-		ai3x-micbias-vg = <1>;	/* 2.0V */
-
-		/* Regulators */
-		AVDD-supply = <&vcc_3v3_sys>;
-		IOVDD-supply = <&vcc_3v3_sys>;
-		DRVDD-supply = <&vcc_3v3_sys>;
-		DVDD-supply = <&vcc_1v8>;
-	};
 };
-
-&main_i2c2 {
-	status = "okay";
-	pinctrl-names = "default";
-	pinctrl-0 = <&main_i2c2_pins_default>;
-	clock-frequency = <400000>;
-
-	typec_pd0: tps6598x@3f {
-		compatible = "ti,tps6598x";
-		reg = <0x3f>;
-
-		connector {
-			compatible = "usb-c-connector";
-			label = "USB-C";
-			self-powered;
-			data-role = "dual";
-			power-role = "sink";
-			port {
-				usb_con_hs: endpoint {
-					remote-endpoint = <&usb0_hs_ep>;
-				};
-			};
-		};
-	};
-};
-
 &wkup_i2c0 {
 	clock-frequency = <400000>;
 	pinctrl-names = "default";
@@ -654,12 +505,18 @@
 
 &sdhci1 {
 	/* SD/MMC */
-	vmmc-supply = <&vdd_mmc1>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_mmc1_pins_default>;
+	/* UHS -> HS */
+	/delete-property/ ti,otap-del-sel-sdr12;
+    	/delete-property/ ti,otap-del-sel-sdr25;
+    	/delete-property/ ti,otap-del-sel-sdr50;
+    	/delete-property/ ti,otap-del-sel-ddr50;
+    	/delete-property/ ti,otap-del-sel-sdr104;
+    	no-1-8-v;
+	disable-wp;
 	status = "okay";
 	bootph-all;
-	disable-wp;
 };
 
 &ospi0 {
@@ -790,16 +647,6 @@
 	bootph-all;
 };
 
-&dss_ports {
-	/* VP1: DPI Output */
-	port@0 {
-		reg = <0>;
-
-		dpi_out: endpoint {
-			remote-endpoint = <&sii9022_in>;
-		};
-	};
-};
 
 &tscadc0 {
 	status = "okay";
@@ -945,15 +792,6 @@
 	ti,vbus-divider;
 };
 
-&usb0 {
-	usb-role-switch;
-
-	port {
-		usb0_hs_ep: endpoint {
-			remote-endpoint = <&usb_con_hs>;
-		};
-	};
-};
 
 &usbss1 {
 	status = "okay";

@@ -36,7 +36,7 @@
 		compatible = "ti,tcan1042";
 		#phy-cells = <0>;
 		max-bitrate = <5000000>;
-	};  	
+	}; 	
 };
 
 &pmx0 {
@@ -117,8 +117,8 @@
 	};
 	mikrobus_gpio0_pins_default: mikrobus_gpio0-default-pins {
 		pinctrl-single,pins = <
-			AM62LX_IOPAD(0x018c, PIN_INPUT|PIN_DRIVE_STRENGTH_NOMINAL, 7) /* (B9) MCASP0_AXR0.GPIO0_82 */
-			AM62LX_IOPAD(0x0238, PIN_INPUT|PIN_DRIVE_STRENGTH_NOMINAL, 7) /* (D6) MMC1_SDWP.GPIO0_123 */
+			AM62LX_IOPAD(0x018c, PIN_OUTPUT_PULLDOWN|PIN_DRIVE_STRENGTH_NOMINAL, 7) /* (B9) MCASP0_AXR0.GPIO0_82 */
+			AM62LX_IOPAD(0x0238, PIN_OUTPUT_PULLDOWN|PIN_DRIVE_STRENGTH_NOMINAL, 7) /* (D6) MMC1_SDWP.GPIO0_123 */
 		>;
 	};
 	mikrobus_i2c0_pins_default: mikrobus_i2c0-default-pins {
@@ -325,20 +325,18 @@
 };
 
 &cpsw3g_mdio {
-        status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&mdio1_pins_default>;
-	
+	status = "okay";
+
 	cpsw3g_phy0: ethernet-phy@6 {
-		compatible = "ethernet-phy-ieee802.3-c22";
 		reg = <6>;
 	};
 };
 
 &cpsw_port1 {
-	phy-mode = "rgmii-id";
+	phy-mode = "rgmii-rxid";
 	phy-handle = <&cpsw3g_phy0>;
-	status = "okay";
 };
 
 /* port 2 not in use */

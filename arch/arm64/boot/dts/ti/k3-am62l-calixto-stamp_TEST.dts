@@ -310,20 +310,21 @@
 };
 
 &cpsw3g_mdio {
-        status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&mdio1_pins_default>;
-	
+	status = "okay";
+
 	cpsw3g_phy0: ethernet-phy@7 {
-		compatible = "ethernet-phy-ieee802.3-c22";
 		reg = <7>;
+		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
+		ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
+		ti,min-output-impedance;
 	};
 };
 
 &cpsw_port1 {
-	phy-mode = "rgmii-id";
+	phy-mode = "rgmii-rxid";
 	phy-handle = <&cpsw3g_phy0>;
-	status = "okay";
 };
 
 /* port 2 not in use */
